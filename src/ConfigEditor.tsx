@@ -69,9 +69,24 @@ export class ConfigEditor extends PureComponent<Props, State> {
             <br></br>
 
 {/* Instance Principals  */}
-        {options.jsonData.environment === AuthProviders.OCI_INSTANCE && (
+        {options.jsonData.environment === AuthProviders.OCI_INSTANCE && 
           <>
-      <FieldSet label="Instance Principals Connection Details">
+      { delete options.jsonData.addon1 }
+      { delete options.jsonData.addon2 }
+      { delete options.jsonData.addon3 }
+      { delete options.jsonData.addon4 }
+      { delete options.jsonData.profile1}
+      { delete options.jsonData.profile2}
+      { delete options.jsonData.profile3}
+      { delete options.jsonData.profile4}
+      { delete options.jsonData.profile5}
+      { delete options.jsonData.region1}
+      { delete options.jsonData.region2}
+      { delete options.jsonData.region3}
+      { delete options.jsonData.region4}
+      { delete options.jsonData.region5}
+
+      (<FieldSet label="Instance Principals Connection Details">
         <InlineField
           label="Default Region"
           labelWidth={28}
@@ -89,16 +104,20 @@ export class ConfigEditor extends PureComponent<Props, State> {
             }}
           />
         </InlineField>
-        </FieldSet>
+        </FieldSet>)
         </>
-        )}
+        }
 
 
 {/* User Principals - Default tenancy */}
-  {options.jsonData.environment === AuthProviders.OCI_USER && (
+  {options.jsonData.environment === AuthProviders.OCI_USER && options.jsonData.tenancymode === TenancyChoices.single &&
               <>
-      <FieldSet label="DEFAULT Connection Details">
+      {delete options.jsonData.addon1 }
+      {delete options.jsonData.addon2 }
+      {delete options.jsonData.addon3 }
+      {delete options.jsonData.addon4 }
 
+      <FieldSet label="DEFAULT Connection Details">
       <InlineField
           label="Config Profile Name"
           labelWidth={28}
@@ -176,14 +195,13 @@ export class ConfigEditor extends PureComponent<Props, State> {
                 onChange={onUpdateDatasourceSecureJsonDataOption(this.props, 'privkey0')}
                 />
       </InlineField>
-
       </FieldSet>
       </>
-      )}  
+      }
 
 
 {/* User Principals - Multitenancy Tenancy 1*/}
-        {options.jsonData.tenancymode === TenancyChoices.multitenancy && (
+        {options.jsonData.tenancymode === TenancyChoices.multitenancy && options.jsonData.environment === AuthProviders.OCI_USER && (
           <>                          
       <FieldSet label="Tenancy-1 Connection Details">
       <InlineField

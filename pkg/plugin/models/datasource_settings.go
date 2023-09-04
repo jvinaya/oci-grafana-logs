@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	jsoniter "github.com/json-iterator/go"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/oracle/oci-grafana-logs/pkg/plugin/constants"
 )
 
@@ -49,9 +50,9 @@ func (d *OCIDatasourceSettings) Load(dsiSettings backend.DataSourceInstanceSetti
 			return fmt.Errorf("could not unmarshal OCIDatasourceSettings json: %w", err)
 		}
 	}
-
+	log.DefaultLogger.Debug(string(dsiSettings.JSONData))
 	// in case of instance principle auth provider
 	d.ConfigProfile = constants.DEFAULT_INSTANCE_PROFILE
-
+	log.DefaultLogger.Debug(d.ConfigProfile)
 	return nil
 }

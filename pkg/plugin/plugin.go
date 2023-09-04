@@ -212,7 +212,7 @@ func (o *OCIDatasource) CheckHealth(ctx context.Context, req *backend.CheckHealt
 
 	return &backend.CheckHealthResult{
 		Status:  backend.HealthStatusOk,
-		Message: "Success",
+		Message: "Successss",
 	}, nil
 }
 
@@ -254,14 +254,20 @@ func OCILoadSettings(req backend.DataSourceInstanceSettings) (*OCIConfigFile, er
 	v := reflect.ValueOf(dat)
 	typeOfS := v.Type()
 	var key string
-
+	log.DefaultLogger.Debug(fmt.Sprint(v.NumField()))
 	for FieldIndex := 0; FieldIndex < v.NumField(); FieldIndex++ {
 		splits := strings.Split(typeOfS.Field(FieldIndex).Name, "_")
+		for _, str := range splits {
+			log.DefaultLogger.Debug("printing the string...")
+			log.DefaultLogger.Debug(str)
+		}
 		SettingsBlockIndex, interr := strconv.Atoi(splits[1])
 		if interr != nil {
 			return nil, fmt.Errorf("can not read settings: %s", interr.Error())
 		}
-
+		log.DefaultLogger.Debug(strconv.Itoa(SettingsBlockIndex))
+		log.DefaultLogger.Debug(strconv.Itoa(TenancySettingsBlock))
+		log.DefaultLogger.Debug(splits[0])
 		if SettingsBlockIndex == TenancySettingsBlock {
 			if splits[0] == "Profile" {
 				if v.Field(FieldIndex).Interface() != "" {
@@ -273,6 +279,8 @@ func OCILoadSettings(req backend.DataSourceInstanceSettings) (*OCIConfigFile, er
 				switch value := v.Field(FieldIndex).Interface(); strings.ToLower(splits[0]) {
 				case "tenancy":
 					q.tenancyocid[key] = fmt.Sprintf("%v", value)
+					log.DefaultLogger.Debug("Printing tenency ocid...")
+					log.DefaultLogger.Debug(q.tenancyocid[key])
 				case "region":
 					q.region[key] = fmt.Sprintf("%v", value)
 				case "user":
@@ -302,13 +310,20 @@ func (o *OCIDatasource) getConfigProvider(environment string, tenancymode string
 		if err != nil {
 			return errors.New("Error Loading config settings")
 		}
-		for key, _ := range q.tenancyocid {
+		for key, value := range q.tenancyocid {
 			var configProvider common.ConfigurationProvider
 			// test if PEM key is valid
 			block, _ := pem.Decode([]byte(q.privkey[key]))
 			if block == nil {
 				return errors.New("error with Private Key")
 			}
+			log.DefaultLogger.Debug(key, value)
+			log.DefaultLogger.Debug("Printing the config values for logs plugin")
+			log.DefaultLogger.Debug("q.tenancyocid[key]: " + q.tenancyocid[key])
+			log.DefaultLogger.Debug("q.user[key]: " + q.user[key])
+			log.DefaultLogger.Debug("q.region[key]: " + q.region[key])
+			log.DefaultLogger.Debug("q.fingerprint[key]: " + q.fingerprint[key])
+			log.DefaultLogger.Debug("q.privkey[key]: " + q.privkey[key])
 			configProvider = common.NewRawConfigurationProvider(q.tenancyocid[key], q.user[key], q.region[key], q.fingerprint[key], q.privkey[key], q.privkeypass[key])
 
 			// creating oci monitoring client
@@ -346,6 +361,17 @@ func (o *OCIDatasource) getConfigProvider(environment string, tenancymode string
 		if err != nil {
 			return errors.New("error with instance principals")
 		}
+		KeyFingerprint, err := configProvider.KeyFingerprint()
+		TenancyOCID, err := configProvider.TenancyOCID()
+		UserOCID, err := configProvider.UserOCID()
+		Region, err := configProvider.Region()
+		//AuthType, err := configProvider.AuthType()
+
+		log.DefaultLogger.Debug("KeyFingerprint:" + KeyFingerprint)
+		log.DefaultLogger.Debug("TenancyOCID:" + TenancyOCID)
+		log.DefaultLogger.Debug("UserOCID:" + UserOCID)
+		log.DefaultLogger.Debug("Region: " + Region)
+		//log.DefaultLogger.Error("AuthType: " + AuthType)
 		monitoringClient, err := monitoring.NewMonitoringClientWithConfigurationProvider(configProvider)
 		if err != nil {
 			backend.Logger.Error("Error with config:" + SingleTenancyKey)

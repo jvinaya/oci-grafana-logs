@@ -4,6 +4,7 @@
 # nvm install 12.20
 # nvm use 12.20
 
+if [[ $BUILD == "true" ]]; then
 if [[ ! -d ./node_modules ]]; then
   echo "dependencies not installed try running: yarn"
   exit 1
@@ -51,3 +52,11 @@ zip -r oci-logs-datasource ./oci-logs-datasource
 # yarn  global add @grafana/toolkit
 # grafana-toolkit plugin:sign
 
+fi
+
+if [[ $DEPLOY == "true" ]]; then
+docker stack rm grafana
+sleep 5
+cp -rp oci-logs-datasource ../../../../../plugin/grafanavar/plugins/
+docker stack deploy grafana -c ../../../../../plugin/docker-compose.yaml
+fi
